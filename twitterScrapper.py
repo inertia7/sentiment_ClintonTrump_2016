@@ -22,10 +22,10 @@ from sqlalchemy.orm import mapper, sessionmaker
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, Unicode, Float # importing Unicode is important! If not, you likely encounter data type error.
 from sqlalchemy.ext.declarative import declarative_base
 
-t = Twython(app_key = 'nHL6RdyZuqPAJ4VSrK48pUQCU',
-        app_secret = 'urwTOqQAVsTXCGu0tixUSxEs2zSfuZ5ptAVa2nA9qjQYi6cuG4',
-        oauth_token = '261933490-bNxEiTOkx89bsqCwgFxZVKxLwt8J3PYoOtrDVLlE',
-        oauth_token_secret = 'igONbEDQ1ohEekc5IqYJlrdeUWACKZBVKCo5XPwWP6Q88')
+t = Twython(app_key = '',
+        app_secret = '',
+        oauth_token = '',
+        oauth_token_secret = '')
 
 Base = declarative_base()
 class TWEET(Base):
