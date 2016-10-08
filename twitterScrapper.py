@@ -1,16 +1,16 @@
 """
 This script is taken from curiosity bits http://www.slideshare.net/cosmopolitanvan/five-steps-to-get-tweets-sent-by-a-list-of-users
 """
-# Simplejson,sqlalchemy and twython need to be installed separately for this script to work
+# simplejson,sqlalchemy and twython need to be installed separately for this script to work
 
-# Ordering imports
+# ordering imports
 # Standard Library modules
 import sys
 import string
 import sqlite3
 import time
+import ConfigParser
 import datetime
-import csv
 from pprint import pprint
 from types import *
 from datetime import datetime, date, time
@@ -20,55 +20,67 @@ from twython import Twython
 import simplejson
 import sqlalchemy
 from sqlalchemy.orm import mapper, sessionmaker
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, Unicode, Float 
-# Importing Unicode is important! If not, you likely encounter data type error.
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, Unicode, Float # importing Unicode is important! If not, you likely encounter data type error.
 from sqlalchemy.ext.declarative import declarative_base
 
-# Other ways to get keys?
+config = ConfigParser.ConfigParser()
+config.read('api_keys.ini')
+print(config.sections())
 
-with open('my_api_keys.csv', 'r') as key_file:
-    app_key = key_file.readline()
-    app_secret = key_file.readline()
-    oauth_token = key_file.readline()
-    oauth_token_secret = key_file.readline()
+# Taken from https://wiki.python.org/moin/ConfigParserExamples
+def ConfigSectionMap(section):
+    dict1 = {}
+    options = config.options(section)
+    for option in options:
+        try:
+            dict1[option] = config.get(section, option)
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+    return dict1
 
+# Consumer Keys
+app_key = ConfigSectionMap("Twitter Keys")['consumer key']
+app_secret = ConfigSectionMap("Twitter Keys")['consumer secret key']
+# Access Tokens
+oauth_token = ConfigSectionMap("Twitter Keys")['access token']
+oauth_token_secret = ConfigSectionMap("Twitter Keys")['access token secret']
+
+t = Twython(app_key = app_key,
+            app_secret = app_secret,
+            oauth_token = oauth_token,
+            oauth_token_secret = oauth_token_secret
+) 
+
+# Just in case we need these
 """
-print "consumer key: " + app_key
-print "consumer secret: " + app_secret
-print "access token: " + oauth_token
-print "access token secret: " + oauth_token_secret
-
-twitter = Twython(app_key, app_secret)
-auth = twitter.get_authentication_tokens(callback_url='https://apps.twitter.com/app/12412895/keys')
-OAUTH_TOKEN = auth['oauth_token']
-OAUTH_TOKEN_SECRET = auth['oauth_token_secret']
-#auth['auth_url']
-oauth_verifier = request.GET['oauth_verifier']
-twitter = Twython(app_key, app_secret,
-                  OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-
-final_step = twitter.get_authorized_tokens(oauth_verifier)
-OAUTH_TOKEN = final_step['oauth_token']
-OAUTH_TOKEN_SECRET = final_step['oauth_token_secret']
-"""
-
-app_key = 'A8VLc8cypTKz1zr0BCjXyk8UA'
-app_secret = 'UqPoI1PjAzHm0PH7lDXC5wE7NunctD8nsEusRRE68l3wNghq7U'
-
-
 t = Twython(app_key = app_key,
             app_secret = app_secret
 )
 auth_tokens = t.get_authentication_tokens(callback_url='http://127.0.0.1:1410/')
 oauth_token = auth_tokens['oauth_token']
 oauth_token_secret = auth_tokens['oauth_token_secret']
-twitter = Twython(app_key = app_key,
-                  app_secret = app_secret,
-                  oauth_token = oauth_token,
-                  oauth_token_secret = oauth_token_secret
+
+key_file = open('api_keys.csv', 'r')
+app_key = key_file.readline().rstrip()
+app_secret = key_file.readline().rstrip()
+oauth_token = key_file.readline().rstrip()
+oauth_token_secret = key_file.readline().rstrip()
+key_file.close()
+
+print "consumer key: " + app_key
+print "consumer secret: " + app_secret
+print "access token: " + oauth_token
+print "access token secret: " + oauth_token_secret
+
+t = Twython(app_key,
+            app_secret,
+            oauth_token,
+            oauth_token_secret
 )
 
-"""
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 """
