@@ -9,6 +9,7 @@ import sys
 import string
 import sqlite3
 import time
+import ConfigParser
 import datetime
 from pprint import pprint
 from types import *
@@ -22,10 +23,67 @@ from sqlalchemy.orm import mapper, sessionmaker
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, Unicode, Float # importing Unicode is important! If not, you likely encounter data type error.
 from sqlalchemy.ext.declarative import declarative_base
 
-t = Twython(app_key = 'nHL6RdyZuqPAJ4VSrK48pUQCU',
-        app_secret = 'urwTOqQAVsTXCGu0tixUSxEs2zSfuZ5ptAVa2nA9qjQYi6cuG4',
-        oauth_token = '261933490-bNxEiTOkx89bsqCwgFxZVKxLwt8J3PYoOtrDVLlE',
-        oauth_token_secret = 'igONbEDQ1ohEekc5IqYJlrdeUWACKZBVKCo5XPwWP6Q88')
+config = ConfigParser.ConfigParser()
+config.read('api_keys.ini')
+print(config.sections())
+
+# Taken from https://wiki.python.org/moin/ConfigParserExamples
+def ConfigSectionMap(section):
+    dict1 = {}
+    options = config.options(section)
+    for option in options:
+        try:
+            dict1[option] = config.get(section, option)
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+    return dict1
+
+# Consumer Keys
+app_key = ConfigSectionMap("Twitter Keys")['consumer key']
+app_secret = ConfigSectionMap("Twitter Keys")['consumer secret key']
+# Access Tokens
+oauth_token = ConfigSectionMap("Twitter Keys")['access token']
+oauth_token_secret = ConfigSectionMap("Twitter Keys")['access token secret']
+
+t = Twython(app_key = app_key,
+            app_secret = app_secret,
+            oauth_token = oauth_token,
+            oauth_token_secret = oauth_token_secret
+) 
+
+# Just in case we need these
+"""
+t = Twython(app_key = app_key,
+            app_secret = app_secret
+)
+auth_tokens = t.get_authentication_tokens(callback_url='http://127.0.0.1:1410/')
+oauth_token = auth_tokens['oauth_token']
+oauth_token_secret = auth_tokens['oauth_token_secret']
+
+key_file = open('api_keys.csv', 'r')
+app_key = key_file.readline().rstrip()
+app_secret = key_file.readline().rstrip()
+oauth_token = key_file.readline().rstrip()
+oauth_token_secret = key_file.readline().rstrip()
+key_file.close()
+
+print "consumer key: " + app_key
+print "consumer secret: " + app_secret
+print "access token: " + oauth_token
+print "access token secret: " + oauth_token_secret
+
+t = Twython(app_key,
+            app_secret,
+            oauth_token,
+            oauth_token_secret
+)
+
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
+"""
 
 Base = declarative_base()
 class TWEET(Base):
@@ -168,7 +226,7 @@ class ACCOUNT(Base):
 
 def get_data(kid):
     try:        
-        d = t.get_user_timeline(screen_name=kid, count="200", page="2", include_entities="true", include_rts="1")  #NEW LINE        
+        d = t.get_user_timeline(screen_name=kid, count="500", page="2", include_entities="true", include_rts="1")  #NEW LINE        
     
     except Exception, e:
         
