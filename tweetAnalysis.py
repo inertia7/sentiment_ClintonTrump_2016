@@ -263,20 +263,25 @@ def tokenized_string(sent):
 def tokenize_row_write(file_csv_writer, row_id, tweet_id, month, day, hour, president, tweet, label):
     # Tokenize tweets
     words_tweet = tokenized_string(tweet)
+
     # Write each tweet to the tokenized tweets file
     # The clinton and the trump file
+    # This is for the wordcloud
     if president == "HillaryClinton":
-        for word in words_tweet:
-            tokenized_clinton.write(word + ' ')
-        tokenized_clinton.write("\n")
+        with open(clinton_tokenized, 'a') as source:
+            for word in words_tweet:
+                source.write(word + ' ')
+            source.write("\n")
     if president == "realDonaldTrump":
-        for word in words_tweet:
-            tokenized_trump.write(word + ' ')
-        tokenized_trump.write("\n")
+        with open(trump_tokenized, 'a') as source:
+            for word in words_tweet:
+                source.write(word + ' ')
+            source.write("\n")
 
-    for word in words_tweet:
-        tokenized_tweets.write(word + ' ')
-    tokenized_tweets.write("\n")
+    with open(tweets_tokenized, 'a') as source:
+        for word in words_tweet:
+            source.write(word + ' ')
+        source.write("\n")
 
     file_csv_writer.writerow([row_id] + [tweet_id] + [month] + [day] + [hour] + [president]+ [words_tweet] + [label])
 
@@ -328,6 +333,8 @@ def data_viz(pos_freq, neu_freq, neg_freq, president):
  
 def word_cloud(tokenized_tweet_file):
     
+    # TAKEN from https://github.com/amueller/word_cloud
+    # I deserve no credit
     #import pdb; pdb.set_trace()
     direc = path.dirname(__file__)
     text = open(path.join(direc, tokenized_tweet_file)).read()
